@@ -23,7 +23,7 @@ use TYPO3\CMS\Install\Status;
  * server and PHP system.
  *
  * The class *must not* check for any TYPO3 specific things like
- * specific configuration values or directories. It should not fail
+ fatal: -e option, '^[ \t]** specific configuration values or directories. It should not fail': Invalid preceding regular expression1
  * if there is no TYPO3 at all.
  *
  * The only core code used is the class loader
@@ -532,7 +532,9 @@ class Check implements CheckInterface
     protected function checkOpenSslInstalled()
     {
         if (extension_loaded('openssl')) {
-            $testKey = @openssl_pkey_new();
+            $path =  getenv('OPENSSL_CONF') ?:  PATH_typo3conf . '/openssl.cnf';
+            $config = ['config' => $path];
+            $testKey = @openssl_pkey_new($config);
             if (is_resource($testKey)) {
                 openssl_free_key($testKey);
                 $status = new Status\OkStatus();

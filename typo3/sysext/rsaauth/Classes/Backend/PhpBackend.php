@@ -21,6 +21,11 @@ namespace TYPO3\CMS\Rsaauth\Backend;
  */
 class PhpBackend extends AbstractBackend
 {
+    protected static function OpenSSLConfig() {
+        $path =  getenv('OPENSSL_CONF') ?:  PATH_typo3conf . '/openssl.cnf';
+        return ['config' => $path];
+    }
+
     /**
      * Creates a new key pair for the encryption or gets the existing key pair (if one already has been generated).
      *
@@ -37,17 +42,17 @@ class PhpBackend extends AbstractBackend
             return $keyPair;
         }
 
-        $privateKey = @openssl_pkey_new();
+        $privateKey = @openssl_pkey_new(self::OpenSSLConfig());
         if ($privateKey !== false) {
             // Create private key as string
             $privateKeyStr = '';
-            openssl_pkey_export($privateKey, $privateKeyStr);
+            openssl_pkey_export($privateKey, $privateKeyStr, self::OpenSSLConfig());
             // Prepare public key information
             $exportedData = '';
             $csr = openssl_csr_new([
                 'localityName' => 'foo',
                 'organizationName' => 'bar',
-            ], $privateKey);
+            ], $privateKey, self::OpenSSLConfig());
             openssl_csr_export($csr, $exportedData, false);
             // Get public key (in fact modulus) and exponent
             $publicKey = $this->extractPublicKeyModulus($exportedData);
@@ -97,7 +102,7 @@ class PhpBackend extends AbstractBackend
             // PHP extension has to be configured properly. It
             // can be installed and available but will not work unless
             // properly configured. So we check if it works.
-            $testKey = @openssl_pkey_new();
+            $testKey = @openssl_pkey_new(self::OpenSSLConfig());
             if (is_resource($testKey)) {
                 openssl_free_key($testKey);
                 $result = true;
