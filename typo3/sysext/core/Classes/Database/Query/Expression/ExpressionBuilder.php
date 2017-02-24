@@ -313,11 +313,14 @@ class ExpressionBuilder
                     1459696680
                 );
                 break;
+            case 'mssql':
             case 'sqlsrv':
             case 'pdo_sqlsrv':
-                throw new \RuntimeException(
-                    'FIND_IN_SET support for database platform "SQLServer" not yet implemented.',
-                    1459696681
+                return sprintf(
+                    '(%s IN (SELECT value FROM STRING_SPLIT(%s, %s)))',
+                    $value,
+                    $this->connection->quoteIdentifier($fieldName),
+                    $this->literal(',')
                 );
                 break;
             case 'sqlite':

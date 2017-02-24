@@ -424,4 +424,29 @@ class Connection extends \Doctrine\DBAL\Connection
 
         return (string)parent::lastInsertId($tableName);
     }
+
+    /**
+     * Unquote a single identifier (no dot expansion). Used to unquote the table names
+     * from the expressionBuilder so that the table can be found in the TCA definition.
+     *
+     * @param string $identifier The identifier / table name
+     * @return string The unquoted table name / identifier
+     */
+    public function unquoteSingleIdentifier(string $identifier): string
+    {
+        $quoteChar = $this->getConnection()
+                   ->getDatabasePlatform()
+                   ->getIdentifierQuoteCharacter();
+
+        $unquotedIdentifier = trim($identifier, $quoteChar);
+
+        return str_replace($quoteChar . $quoteChar, $quoteChar, $unquotedIdentifier);
+    }
+
+    /**
+     * Allow as specific database connection to fix this query while it is not stringified yet
+     * @return void
+     */
+    public function fixQueryForSpecificConnection(QueryBuilder $query) {
+    }
 }

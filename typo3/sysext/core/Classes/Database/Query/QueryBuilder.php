@@ -162,6 +162,8 @@ class QueryBuilder
      */
     public function execute()
     {
+        $this->connection->fixQueryForSpecificConnection($this);
+
         if ($this->getType() !== \Doctrine\DBAL\Query\QueryBuilder::SELECT) {
             return $this->concreteQueryBuilder->execute();
         }
@@ -1018,13 +1020,7 @@ class QueryBuilder
      */
     protected function unquoteSingleIdentifier(string $identifier): string
     {
-        $quoteChar = $this->getConnection()
-            ->getDatabasePlatform()
-            ->getIdentifierQuoteCharacter();
-
-        $unquotedIdentifier = trim($identifier, $quoteChar);
-
-        return str_replace($quoteChar . $quoteChar, $quoteChar, $unquotedIdentifier);
+        return $this->getConnection()->unquoteSingleIdentifier($identifier);
     }
 
     /**

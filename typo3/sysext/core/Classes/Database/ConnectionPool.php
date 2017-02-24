@@ -118,7 +118,17 @@ class ConnectionPool
 
         $connectionParams = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'][$connectionName];
         if (empty($connectionParams['wrapperClass'])) {
-            $connectionParams['wrapperClass'] = Connection::class;
+            $connectionClass = null;
+            switch($connectionParams['driver']) {
+                case 'sqlsrv':
+                case 'pdo_sqlsrv':
+                    $connectionClass = MssqlConnection::class;
+                    break;
+                default:
+                    $connectionClass = Connection::class;
+                    break;
+            }
+            $connectionParams['wrapperClass'] = $connectionClass;
         }
 
         if (!is_a($connectionParams['wrapperClass'], Connection::class, true)) {
